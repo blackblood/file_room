@@ -14,7 +14,8 @@ module FileRoom
             @@defined_methods[method_name] = true
             context = Module.new do
               define_method(method_name) do |*args,&blk|
-                save_method_call(__method__, args)
+                object_ids_counter = args.last
+                save_method_call(__method__, args << self.object_id)
                 super *args, &blk
               end
               
@@ -29,6 +30,7 @@ module FileRoom
         proxy = Module.new do
           m.each do |mname|
             define_method(mname) do |*args,&blk|
+              args << self.object_id
               save_method_call(__method__, args)
               super *args, &blk
             end
